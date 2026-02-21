@@ -53,16 +53,16 @@
             <div class="lg:col-span-4">
                 <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 sticky top-8">
                     <h2 class="text-sm font-black mb-5 text-slate-700 uppercase tracking-widest flex items-center">
-                        <span class="bg-blue-600 w-2 h-4 rounded-full mr-2"></span> Input Perolehan
+                        <span class="bg-blue-600 w-2 h-4 rounded-full mr-2"></span> Multi-Input Perolehan
                     </h2>
                     <form id="salesForm" class="space-y-4">
                         <div>
                             <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Tanggal</label>
-                            <input type="date" id="tanggal" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="date" id="tanggal" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Nama Staff</label>
-                            <select id="nama_staff" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                            <select id="nama_staff" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm">
                                 <option value="" disabled selected>Pilih Staff...</option>
                                 <option value="Fitriansyah">Fitriansyah</option>
                                 <option value="Dzonah Fida Ayuningtyas">Dzonah Fida Ayuningtyas</option>
@@ -87,7 +87,7 @@
                         </div>
                         <div>
                             <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Produk</label>
-                            <select id="produk" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+                            <select id="produk" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm">
                                 <option value="GMM">GMM</option>
                                 <option value="Livin Merchant (Ureg)">Livin Merchant (Ureg)</option>
                                 <option value="Livin Merchant (Usak)">Livin Merchant (Usak)</option>
@@ -97,16 +97,21 @@
                                 <option value="CC">CC</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">No. Rekening</label>
-                            <input type="text" id="no_rek" required placeholder="14800xxxx" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none">
+
+                        <div id="rekeningContainer" class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">No. Rekening & Notes</label>
+                            <div class="flex gap-2 items-start">
+                                <input type="text" placeholder="No. Rek" required class="no_rek_field w-1/2 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs">
+                                <input type="text" placeholder="Notes" class="notes_field w-1/2 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs">
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Notes</label>
-                            <textarea id="notes" rows="1" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none"></textarea>
-                        </div>
-                        <button type="submit" id="btnSimpan" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg uppercase text-xs tracking-widest transition-all active:scale-95">
-                            Simpan Data
+                        
+                        <button type="button" onclick="addRekRow()" class="w-full py-2 border-2 border-dashed border-slate-200 rounded-xl text-[10px] font-bold text-slate-400 hover:bg-slate-50 transition-all uppercase">
+                            + Tambah Rekening Lain
+                        </button>
+
+                        <button type="submit" id="btnSimpan" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-xl shadow-lg uppercase text-xs tracking-widest transition-all active:scale-95 mt-4">
+                            Simpan Semua Perolehan
                         </button>
                     </form>
                 </div>
@@ -130,11 +135,11 @@
                             <tbody id="tableBody" class="divide-y divide-slate-50 text-xs md:text-sm"></tbody>
                         </table>
                     </div>
-                    <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
-                        <span id="pageInfo" class="text-[10px] font-bold text-slate-400 uppercase">Page 1 of 1</span>
+                    <div class="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase">
+                        <span id="pageInfo">Page 1 of 1</span>
                         <div class="flex gap-2">
-                            <button onclick="prevPage()" class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-100 disabled:opacity-50">Prev</button>
-                            <button onclick="nextPage()" class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-100 disabled:opacity-50">Next</button>
+                            <button onclick="prevPage()" class="px-3 py-1 bg-white border border-slate-200 rounded-lg hover:bg-slate-100">Prev</button>
+                            <button onclick="nextPage()" class="px-3 py-1 bg-white border border-slate-200 rounded-lg hover:bg-slate-100">Next</button>
                         </div>
                     </div>
                 </div>
@@ -155,18 +160,30 @@
         const now = new Date();
         inputFilter.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-        function maskAccount(acc) {
-            if (!acc) return "-";
-            const s = acc.toString().trim();
-            return s.length <= 8 ? s : s.substring(0, 5) + "****" + s.substring(s.length - 3);
+        // FUNGSI TAMBAH BARIS REKENING
+        function addRekRow() {
+            const container = document.getElementById('rekeningContainer');
+            const div = document.createElement('div');
+            div.className = "flex gap-2 items-start animate-fade-in";
+            div.innerHTML = `
+                <input type="text" placeholder="No. Rek" required class="no_rek_field w-1/2 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs">
+                <input type="text" placeholder="Notes" class="notes_field w-1/2 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs">
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 p-3 hover:text-red-600">×</button>
+            `;
+            container.appendChild(div);
         }
 
         function toggleSummary() {
             const wrapper = document.getElementById('summaryWrapper');
-            const btnText = document.getElementById('toggleText');
             const isHidden = wrapper.classList.toggle('hidden');
-            btnText.innerText = isHidden ? "Show Summary" : "Hide Summary";
+            document.getElementById('toggleText').innerText = isHidden ? "Show Summary" : "Hide Summary";
             document.getElementById('toggleIcon').innerText = isHidden ? "👁️" : "🙈";
+        }
+
+        function maskAccount(acc) {
+            if (!acc) return "-";
+            const s = acc.toString().trim();
+            return s.length <= 8 ? s : s.substring(0, 5) + "****" + s.substring(s.length - 3);
         }
 
         async function fetchData() {
@@ -181,10 +198,10 @@
                 .order('tanggal', { ascending: false })
                 .order('created_at', { ascending: false });
 
-            if (error) return;
-            allData = data;
-            currentPage = 1;
-            renderAll();
+            if (!error) {
+                allData = data;
+                renderAll();
+            }
         }
 
         function renderAll() {
@@ -195,7 +212,7 @@
         function renderSummary() {
             const container = document.getElementById('summaryContainer');
             if (allData.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 text-xs italic p-4">No participation data.</p>`;
+                container.innerHTML = `<p class="text-slate-400 text-xs italic p-4">No data.</p>`;
                 return;
             }
 
@@ -228,13 +245,7 @@
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const paginatedData = allData.slice(start, end);
-
-            if (allData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">Data kosong.</td></tr>`;
-                return;
-            }
+            const paginatedData = allData.slice(start, start + rowsPerPage);
 
             tbody.innerHTML = paginatedData.map(item => `
                 <tr class="hover:bg-blue-50/20 transition-colors">
@@ -245,49 +256,60 @@
                 </tr>
             `).join('');
 
-            const totalPages = Math.ceil(allData.length / rowsPerPage) || 1;
-            document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${Math.ceil(allData.length / rowsPerPage) || 1}`;
         }
 
-        function nextPage() {
-            if (currentPage * rowsPerPage < allData.length) {
-                currentPage++;
-                renderTable();
-            }
-        }
+        function nextPage() { if (currentPage * rowsPerPage < allData.length) { currentPage++; renderTable(); } }
+        function prevPage() { if (currentPage > 1) { currentPage--; renderTable(); } }
 
-        function prevPage() {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-            }
-        }
-
-        inputFilter.addEventListener('change', fetchData);
-
+        // LOGIKA SIMPAN BANYAK DATA
         document.getElementById('salesForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpan');
-            btn.innerText = 'PROSES...'; btn.disabled = true;
+            btn.innerText = 'MEMPROSES...'; btn.disabled = true;
 
-            const payload = {
-                tanggal: document.getElementById('tanggal').value,
-                nama_staff: document.getElementById('nama_staff').value,
-                produk: document.getElementById('produk').value,
-                no_rek: document.getElementById('no_rek').value,
-                notes: document.getElementById('notes').value,
-                status: 'Pending'
-            };
+            const tanggal = document.getElementById('tanggal').value;
+            const nama_staff = document.getElementById('nama_staff').value;
+            const produk = document.getElementById('produk').value;
+            
+            const reks = document.querySelectorAll('.no_rek_field');
+            const notes = document.querySelectorAll('.notes_field');
+            
+            const payloads = [];
+            reks.forEach((el, index) => {
+                if (el.value.trim() !== "") {
+                    payloads.push({
+                        tanggal,
+                        nama_staff,
+                        produk,
+                        no_rek: el.value,
+                        notes: notes[index].value || "",
+                        status: 'Pending',
+                        jumlah: 1
+                    });
+                }
+            });
 
-            const { error } = await _supabase.from('perolehan_gmm').insert([payload]);
+            const { error } = await _supabase.from('perolehan_gmm').insert(payloads);
+            
             if (!error) {
                 document.getElementById('salesForm').reset();
+                document.getElementById('rekeningContainer').innerHTML = `
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">No. Rekening & Notes</label>
+                    <div class="flex gap-2 items-start">
+                        <input type="text" placeholder="No. Rek" required class="no_rek_field w-1/2 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs">
+                        <input type="text" placeholder="Notes" class="notes_field w-1/2 p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none text-xs">
+                    </div>
+                `;
                 document.getElementById('tanggal').valueAsDate = new Date();
                 fetchData();
+            } else {
+                alert("Error: " + error.message);
             }
-            btn.innerText = 'SIMPAN DATA'; btn.disabled = false;
+            btn.innerText = 'SIMPAN SEMUA PEROLEHAN'; btn.disabled = false;
         });
 
+        inputFilter.addEventListener('change', fetchData);
         document.getElementById('tanggal').valueAsDate = new Date();
         fetchData();
         _supabase.channel('sales_db').on('postgres_changes', { event: '*', schema: 'public', table: 'perolehan_gmm' }, fetchData).subscribe();
