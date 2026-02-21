@@ -6,99 +6,175 @@
     <title>Kacab Dashboard - Mandiri Bontang Ahmad Yani</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
     <style>
         .custom-scrollbar::-webkit-scrollbar { height: 4px; width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         #adminContent { display: none; }
         .mandiri-gradient { background: linear-gradient(135deg, #003d79 0%, #002a54 100%); }
+        th { cursor: pointer; transition: background 0.2s; }
+        th:hover { background-color: #f8fafc; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen font-sans text-slate-900">
 
     <div id="loginGate" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center border border-slate-100">
-            <div class="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 border border-blue-100">
-                <span class="text-3xl">🔑</span>
-            </div>
-            <h2 class="text-2xl font-black text-slate-800 mb-2 tracking-tight">Kacab Access</h2>
-            <p class="text-slate-500 text-sm mb-8">Masukkan kode akses untuk mengelola data perolehan.</p>
-            <input type="password" id="adminPass" placeholder="Enter Password" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl mb-4 focus:ring-2 focus:ring-blue-600 outline-none text-center font-bold tracking-widest">
-            <button onclick="checkPass()" class="w-full mandiri-gradient text-white font-black py-4 rounded-2xl transition-all shadow-lg active:scale-95">
-                UNLOCK DASHBOARD
-            </button>
-            <a href="index.html" class="block mt-6 text-xs text-slate-400 hover:text-blue-600 transition-colors font-bold uppercase tracking-widest">← Back to Staff View</a>
+        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center">
+            <h2 class="text-2xl font-black text-slate-800 mb-6 uppercase tracking-tight">Kacab Access</h2>
+            <input type="password" id="adminPass" placeholder="Password" class="w-full p-4 bg-slate-50 border rounded-2xl mb-4 text-center font-bold tracking-widest outline-none focus:ring-2 focus:ring-blue-600">
+            <button onclick="checkPass()" class="w-full mandiri-gradient text-white font-black py-4 rounded-2xl shadow-lg">UNLOCK DASHBOARD</button>
         </div>
     </div>
 
     <div id="adminContent">
-        <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="mandiri-gradient p-2.5 rounded-xl shadow-inner">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </div>
-                    <div>
-                        <h1 class="font-black text-slate-800 text-xl tracking-tight leading-none uppercase">Kacab Dashboard</h1>
-                        <p class="text-[10px] text-blue-600 font-bold uppercase tracking-[0.2em] mt-1">Management Console</p>
-                    </div>
+        <nav class="bg-white border-b px-6 py-4 sticky top-0 z-50 shadow-sm flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="mandiri-gradient p-2.5 rounded-xl text-white shadow-lg">🏢</div>
+                <div>
+                    <h1 class="font-black text-slate-800 uppercase text-sm leading-none">Management Console</h1>
+                    <p class="text-[9px] text-blue-600 font-bold tracking-widest uppercase mt-1">Bontang Ahmad Yani</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <input type="month" id="filterBulan" class="text-sm font-bold border-slate-200 rounded-xl focus:ring-blue-600 cursor-pointer">
-                    <button onclick="logoutAdmin()" class="bg-red-50 text-red-600 p-2.5 rounded-xl hover:bg-red-100 transition-colors border border-red-100" title="Logout">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    </button>
-                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <input type="month" id="filterBulan" onchange="fetchAdminData()" class="text-xs font-bold border-slate-200 rounded-xl p-2 outline-none focus:ring-2 focus:ring-blue-600">
+                <button onclick="logoutAdmin()" class="bg-red-50 text-red-600 p-2.5 rounded-xl border border-red-100">🚪</button>
             </div>
         </nav>
 
-        <main class="max-w-7xl mx-auto p-4 md:p-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 relative overflow-hidden group">
-                    <div class="absolute right-[-10px] bottom-[-10px] text-slate-50 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
-                    </div>
-                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Total Perolehan Cabang</p>
-                    <h3 id="statTotal" class="text-5xl font-black text-slate-800">0</h3>
+        <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+            
+            <div class="flex flex-col md:flex-row justify-between items-end gap-4">
+                <div class="w-full">
+                    <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Total Perolehan Produk</h2>
+                    <div id="productSummaryGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3"></div>
                 </div>
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 relative overflow-hidden group">
-                    <div class="absolute right-[-10px] bottom-[-10px] text-slate-50 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm min-w-[300px]">
+                    <p class="text-[9px] font-black text-slate-400 uppercase mb-3">Cetak Laporan Per Periode</p>
+                    <div class="flex gap-2 mb-3">
+                        <input type="date" id="reportStart" class="text-[10px] p-2 bg-slate-50 border rounded-lg w-full">
+                        <input type="date" id="reportEnd" class="text-[10px] p-2 bg-slate-50 border rounded-lg w-full">
                     </div>
-                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Update Terakhir</p>
-                    <h3 id="statDate" class="text-2xl font-black text-blue-600 mt-3 uppercase tracking-tight">-</h3>
+                    <button onclick="generatePDF()" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black rounded-xl transition-all uppercase tracking-widest">
+                        Generate PDF Report
+                    </button>
                 </div>
             </div>
 
             <div class="bg-white rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden">
-                <div class="p-6 border-b border-slate-100 bg-white flex flex-col md:flex-row justify-between items-center gap-4">
-                    <h2 class="font-black text-slate-800 uppercase text-sm tracking-widest flex items-center gap-2">
-                        <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
-                        Master Data Perolehan
+                <div class="p-6 border-b bg-slate-50/50">
+                    <h2 class="font-black text-slate-800 uppercase text-xs tracking-widest flex items-center gap-2">
+                        <span class="w-2 h-4 bg-red-500 rounded-full"></span> Matrix Nihil Per Staff
                     </h2>
-                    <div class="relative w-full md:w-64">
-                        <input type="text" id="adminSearch" onkeyup="searchTable()" placeholder="Cari nama staff..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600">
-                        <span class="absolute left-3 top-2.5 text-slate-400">🔍</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-white text-slate-400 font-black uppercase text-[9px]">
+                            <tr>
+                                <th class="px-6 py-4 border-b">Nama Staff</th>
+                                <th class="px-6 py-4 border-b">Produk Belum Tercapai (Nihil)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nihilTableBody" class="divide-y divide-slate-50"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden">
+                <div class="p-6 border-b flex flex-col md:flex-row justify-between items-center gap-4">
+                    <h2 class="font-black text-slate-800 uppercase text-xs tracking-widest">Master Data Perolehan</h2>
+                    <div class="relative w-full md:w-80">
+                        <input type="text" id="adminSearch" onkeyup="searchTable()" placeholder="Cari staff, produk, atau no rek..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-blue-600">
+                        <span class="absolute left-4 top-3 text-slate-400">🔍</span>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left border-collapse" id="masterTable">
-                        <thead class="bg-slate-50 text-[10px] text-slate-400 uppercase font-black tracking-wider">
+                    <table class="w-full text-left border-collapse" id="mainTable">
+                        <thead class="bg-slate-50 text-[10px] text-slate-400 uppercase font-black">
                             <tr>
-                                <th class="px-6 py-5 border-b border-slate-100">Tanggal</th>
-                                <th class="px-6 py-5 border-b border-slate-100">Nama Staff</th>
-                                <th class="px-6 py-5 border-b border-slate-100">Produk</th>
-                                <th class="px-6 py-5 border-b border-slate-100">No. Rekening</th>
-                                <th class="px-6 py-5 border-b border-slate-100">Catatan</th>
-                                <th class="px-6 py-5 border-b border-slate-100 text-center">Tindakan</th>
+                                <th onclick="sortData('tanggal')" class="px-6 py-5">Tanggal <span id="s-tanggal">↕</span></th>
+                                <th onclick="sortData('nama_staff')" class="px-6 py-5">Staff <span id="s-nama_staff">↕</span></th>
+                                <th onclick="sortData('produk')" class="px-6 py-5">Produk <span id="s-produk">↕</span></th>
+                                <th onclick="sortData('no_rek')" class="px-6 py-5">No. Rekening <span id="s-no_rek">↕</span></th>
+                                <th class="px-6 py-5">Catatan</th>
+                                <th class="px-6 py-5 text-center">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="adminTableBody" class="divide-y divide-slate-100 text-sm">
-                            </tbody>
+                        <tbody id="adminTableBody" class="divide-y text-sm"></tbody>
                     </table>
+                </div>
+
+                <div class="p-6 bg-slate-50 flex justify-between items-center">
+                    <span id="pageInfo" class="text-[10px] font-bold text-slate-400 uppercase"></span>
+                    <div class="flex gap-2">
+                        <button onclick="changePage(-1)" class="px-4 py-2 bg-white border rounded-xl text-[10px] font-black hover:bg-slate-100">PREV</button>
+                        <button onclick="changePage(1)" class="px-4 py-2 bg-white border rounded-xl text-[10px] font-black hover:bg-slate-100">NEXT</button>
+                    </div>
                 </div>
             </div>
         </main>
+    </div>
+
+    <div id="editModal" class="hidden fixed inset-0 z-[110] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8">
+            <h3 class="text-xl font-black text-slate-800 mb-6 uppercase tracking-tight">Edit Perolehan</h3>
+            <form id="editForm" class="space-y-4">
+                <input type="hidden" id="editId">
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase">Tanggal</label>
+                    <input type="date" id="editTanggal" class="w-full p-3 bg-slate-50 border rounded-xl text-xs outline-none">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase">Nama Staff</label>
+                    <select id="editNama" class="w-full p-3 bg-slate-50 border rounded-xl text-xs outline-none">
+                        <option value="Fitriansyah">Fitriansyah</option>
+                        <option value="Dzonah Fida Ayuningtyas">Dzonah Fida Ayuningtyas</option>
+                        <option value="Ayu Puspita Sari">Ayu Puspita Sari</option>
+                        <option value="Dewi Intan Eka Purwati">Dewi Intan Eka Purwati</option>
+                        <option value="Robbi Maulana">Robbi Maulana</option>
+                        <option value="Ayu Erika Fitriani">Ayu Erika Fitriani</option>
+                        <option value="Vani Yuliani">Vani Yuliani</option>
+                        <option value="Nur Aisyah">Nur Aisyah</option>
+                        <option value="Devi Mayasari">Devi Mayasari</option>
+                        <option value="M Abdau Miraj">M Abdau Miraj</option>
+                        <option value="Aidil Basri">Aidil Basri</option>
+                        <option value="Endah Widyastuti S">Endah Widyastuti S</option>
+                        <option value="Desyta">Desyta</option>
+                        <option value="Bambang Hermanto">Bambang Hermanto</option>
+                        <option value="Hendra Ade A">Hendra Ade A</option>
+                        <option value="Firman">Firman</option>
+                        <option value="Adhan">Adhan</option>
+                        <option value="Ahmad">Ahmad</option>
+                        <option value="Raihan Ramadhani">Raihan Ramadhani</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase">Produk</label>
+                    <select id="editProduk" class="w-full p-3 bg-slate-50 border rounded-xl text-xs outline-none">
+                        <option value="GMM">GMM</option>
+                        <option value="Livin Merchant (Ureg)">Livin Merchant (Ureg)</option>
+                        <option value="Livin Merchant (Usak)">Livin Merchant (Usak)</option>
+                        <option value="MTR">MTR</option>
+                        <option value="Livin (Usak)">Livin (Usak)</option>
+                        <option value="Rek Tabungan">Rek Tabungan</option>
+                        <option value="CC">CC</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase">No. Rekening</label>
+                    <input type="text" id="editRek" class="w-full p-3 bg-slate-50 border rounded-xl text-xs outline-none">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-slate-400 uppercase">Catatan</label>
+                    <textarea id="editNotes" class="w-full p-3 bg-slate-50 border rounded-xl text-xs outline-none" rows="2"></textarea>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-4 bg-slate-100 text-slate-500 font-bold rounded-2xl uppercase text-[10px]">Batal</button>
+                    <button type="submit" class="flex-1 py-4 mandiri-gradient text-white font-bold rounded-2xl uppercase text-[10px]">Simpan</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -107,13 +183,21 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5d3pveG5yb2NpZmZncnRpand1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzNjQzNjIsImV4cCI6MjA4NTk0MDM2Mn0.6FbbroZ7UG5veUc8oq-0pHMxLJgvavUn7sKOBj4Pl9s';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        const listProduk = ["GMM", "Livin Merchant (Ureg)", "Livin Merchant (Usak)", "MTR", "Livin (Usak)", "Rek Tabungan", "CC"];
+        const listStaff = ["Fitriansyah", "Dzonah Fida Ayuningtyas", "Ayu Puspita Sari", "Dewi Intan Eka Purwati", "Robbi Maulana", "Ayu Erika Fitriani", "Vani Yuliani", "Nur Aisyah", "Devi Mayasari", "M Abdau Miraj", "Aidil Basri", "Endah Widyastuti S", "Desyta", "Bambang Hermanto", "Hendra Ade A", "Firman", "Adhan", "Ahmad", "Raihan Ramadhani"];
+
+        let allAdminData = [];
+        let currentPage = 1;
+        const rowsPerPage = 25;
+        let sortConfig = { key: 'tanggal', dir: 'desc' };
+
         function checkPass() {
             if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
                 document.getElementById('loginGate').classList.add('hidden');
                 document.getElementById('adminContent').style.display = 'block';
                 sessionStorage.setItem('isAdmin', 'true');
                 fetchAdminData();
-            } else { alert('Password Salah!'); }
+            } else { alert('Akses ditolak!'); }
         }
 
         if (sessionStorage.getItem('isAdmin') === 'true') {
@@ -132,83 +216,300 @@
         async function fetchAdminData() {
             const [year, month] = filterBulan.value.split('-');
             const lastDay = new Date(year, month, 0).getDate();
-
-            const { data, error } = await _supabase
-                .from('perolehan_gmm')
-                .select('*')
-                .gte('tanggal', `${year}-${month}-01`)
-                .lte('tanggal', `${year}-${month}-${lastDay}`)
-                .order('created_at', { ascending: false });
+            const { data, error } = await _supabase.from('perolehan_gmm').select('*')
+                .gte('tanggal', `${year}-${month}-01`).lte('tanggal', `${year}-${month}-${lastDay}`);
 
             if (!error) {
-                renderAdminTable(data);
-                updateStats(data);
+                allAdminData = data;
+                sortData(sortConfig.key, true);
+                renderNihilMonitoring(data);
+                renderProductSummary(data);
             }
         }
 
-        function updateStats(data) {
-            document.getElementById('statTotal').innerText = data.length;
-            if(data.length > 0) {
-                const latest = data[0].tanggal;
-                document.getElementById('statDate').innerText = latest;
-            }
+        function renderProductSummary(data) {
+            const container = document.getElementById('productSummaryGrid');
+            const counts = {};
+            data.forEach(item => { counts[item.produk] = (counts[item.produk] || 0) + 1; });
+            container.innerHTML = listProduk.map(prod => {
+                const jml = counts[prod] || 0;
+                return `<div class="bg-white p-4 rounded-2xl border ${jml === 0 ? 'bg-red-50 border-red-100' : 'border-slate-200'}">
+                    <p class="text-[8px] font-black text-slate-400 uppercase truncate">${prod}</p>
+                    <h4 class="${jml === 0 ? 'text-red-500 italic' : 'font-black text-slate-800'} text-lg">${jml === 0 ? 'Nihil' : jml}</h4>
+                </div>`;
+            }).join('');
         }
 
-        function renderAdminTable(data) {
-            const tbody = document.getElementById('adminTableBody');
-            tbody.innerHTML = data.map(item => `
-                <tr class="hover:bg-blue-50/30 transition-colors">
-                    <td class="px-6 py-5 text-slate-500 font-medium whitespace-nowrap">${item.tanggal}</td>
-                    <td class="px-6 py-5 font-bold text-slate-800 uppercase text-xs tracking-tight">${item.nama_staff}</td>
-                    <td class="px-6 py-5">
-                        <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-[10px] font-black border border-blue-100 uppercase italic">
-                            ${item.produk}
-                        </span>
-                    </td>
-                    <td class="px-6 py-5 font-mono text-xs text-slate-600 font-bold">${item.no_rek}</td>
-                    <td class="px-6 py-5 text-slate-400 italic text-xs max-w-[200px] truncate">${item.notes || '-'}</td>
-                    <td class="px-6 py-5">
-                        <div class="flex justify-center gap-3">
-                            <button onclick="editItem('${item.id}', '${item.notes}')" class="text-blue-500 hover:text-blue-700 p-2 hover:bg-blue-50 rounded-xl transition-all" title="Edit Catatan">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            </button>
-                            <button onclick="deleteItem('${item.id}')" class="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-xl transition-all" title="Hapus Data">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
+        function renderNihilMonitoring(data) {
+            const tbody = document.getElementById('nihilTableBody');
+            const matrix = {};
+            listStaff.forEach(s => matrix[s] = [...listProduk]);
+            
+            data.forEach(item => {
+                if (matrix[item.nama_staff]) {
+                    matrix[item.nama_staff] = matrix[item.nama_staff].filter(p => p !== item.produk);
+                }
+            });
+
+            tbody.innerHTML = Object.entries(matrix).map(([staff, nihils]) => {
+                if (nihils.length === 0) return '';
+                return `<tr>
+                    <td class="px-6 py-3 font-bold text-slate-700 uppercase text-[10px]">${staff}</td>
+                    <td class="px-6 py-3">
+                        <div class="flex flex-wrap gap-1">
+                            ${nihils.map(p => `<span class="bg-red-50 text-red-500 border border-red-100 px-2 py-0.5 rounded-md text-[9px] font-bold italic">${p}</span>`).join('')}
                         </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminTableBody');
+            const start = (currentPage - 1) * rowsPerPage;
+            const paginated = allAdminData.slice(start, start + rowsPerPage);
+
+            tbody.innerHTML = paginated.map(item => `
+                <tr class="hover:bg-blue-50/20 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-500 font-medium text-[11px]">${item.tanggal}</td>
+                    <td class="px-6 py-4 font-bold text-slate-800 uppercase text-[10px]">${item.nama_staff}</td>
+                    <td class="px-6 py-4 text-[10px] font-black text-blue-600 uppercase italic">${item.produk}</td>
+                    <td class="px-6 py-4 font-mono text-xs text-slate-600">${item.no_rek}</td>
+                    <td class="px-6 py-4 text-slate-400 italic text-[10px] max-w-[150px] truncate">${item.notes || '-'}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="openEditModal('${item.id}')" class="text-blue-500 mr-2">✏️</button>
+                        <button onclick="deleteItem('${item.id}')" class="text-red-400">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('pageInfo').innerText = `Hal ${currentPage} / ${Math.ceil(allAdminData.length / rowsPerPage) || 1}`;
+        }
+
+        // UNIVERSAL SEARCH
+        function searchTable() {
+            const q = document.getElementById("adminSearch").value.toUpperCase();
+            const filtered = allAdminData.filter(i => 
+                i.nama_staff.toUpperCase().includes(q) || 
+                i.produk.toUpperCase().includes(q) || 
+                i.no_rek.toString().includes(q)
+            );
+            
+            // Render ulang tabel khusus hasil filter (tidak permanen mengubah allAdminData)
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = filtered.slice(0, rowsPerPage).map(item => `
+                <tr class="hover:bg-blue-50/20 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-500 text-[11px]">${item.tanggal}</td>
+                    <td class="px-6 py-4 font-bold text-slate-800 uppercase text-[10px]">${item.nama_staff}</td>
+                    <td class="px-6 py-4 text-[10px] font-black text-blue-600 uppercase italic">${item.produk}</td>
+                    <td class="px-6 py-4 font-mono text-xs">${item.no_rek}</td>
+                    <td class="px-6 py-4 text-slate-400 italic text-[10px]">${item.notes || '-'}</td>
+                    <td class="px-6 py-4 text-center">
+                        <button onclick="openEditModal('${item.id}')">✏️</button>
                     </td>
                 </tr>
             `).join('');
         }
 
-        function searchTable() {
-            const input = document.getElementById("adminSearch").value.toUpperCase();
-            const rows = document.getElementById("adminTableBody").getElementsByTagName("tr");
-            for (let i = 0; i < rows.length; i++) {
-                const nameCol = rows[i].getElementsByTagName("td")[1];
-                if (nameCol) {
-                    const textValue = nameCol.textContent || nameCol.innerText;
-                    rows[i].style.display = textValue.toUpperCase().indexOf(input) > -1 ? "" : "none";
-                }
-            }
+        // PDF GENERATOR
+        async function generatePDF() {
+    const start = document.getElementById('reportStart').value;
+    const end = document.getElementById('reportEnd').value;
+    if (!start || !end) return alert("Silakan pilih rentang tanggal laporan!");
+
+    const { data, error } = await _supabase.from('perolehan_gmm')
+        .select('*')
+        .gte('tanggal', start)
+        .lte('tanggal', end)
+        .order('tanggal', { ascending: true });
+
+    if (!data || data.length === 0) return alert("Data tidak ditemukan pada periode tersebut.");
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const primaryColor = [0, 61, 121]; // Mandiri Navy
+    const accentColor = [255, 184, 28]; // Mandiri Gold
+    const lightBg = [248, 250, 252];
+
+    // --- HALAMAN 1: COVER ---
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, 210, 297, 'F');
+    
+    // Aksen Garis Gold
+    doc.setFillColor(...accentColor);
+    doc.rect(20, 40, 2, 40, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(28);
+    doc.text("SALES PERFORMANCE", 28, 55);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(18);
+    doc.text("REPORT", 28, 65);
+
+    doc.setFontSize(12);
+    doc.text(`Periode: ${new Date(start).toLocaleDateString('id-ID')} - ${new Date(end).toLocaleDateString('id-ID')}`, 28, 85);
+    
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(255, 255, 255);
+    doc.line(28, 92, 100, 92);
+
+    doc.setFontSize(10);
+    doc.text("KCP BONTANG AHMAD YANI", 28, 270);
+    doc.text("Generated by Kacab Dashboard System", 28, 276);
+
+    // --- HALAMAN 2: RINGKASAN EKSEKUTIF ---
+    doc.addPage();
+    doc.setTextColor(40, 40, 40);
+    
+    // Header Halaman
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("RINGKASAN EKSEKUTIF", 14, 20);
+    doc.setDrawColor(...accentColor);
+    doc.setLineWidth(1);
+    doc.line(14, 23, 30, 23);
+
+    // Hitung Statistik
+    const totalData = data.length;
+    const prodStats = {};
+    listProduk.forEach(p => prodStats[p] = 0);
+    data.forEach(d => prodStats[d.produk]++);
+
+    // Box Total Perolehan
+    doc.setFillColor(...lightBg);
+    doc.roundedRect(14, 35, 182, 30, 3, 3, 'F');
+    doc.setTextColor(...primaryColor);
+    doc.setFontSize(10);
+    doc.text("TOTAL PEROLEHAN KESELURUHAN", 20, 45);
+    doc.setFontSize(22);
+    doc.text(`${totalData} Transaksi`, 20, 57);
+
+    // Grid Perolehan Per Produk (Informatif)
+    doc.setTextColor(40, 40, 40);
+    doc.setFontSize(12);
+    doc.text("Pencapaian Per Produk", 14, 85);
+    
+    let yPos = 95;
+    Object.entries(prodStats).forEach(([name, count]) => {
+        // Gambar Bar Horizontal Sederhan
+        const barWidth = (count / (totalData || 1)) * 100;
+        
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.text(name, 14, yPos);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${count} Qty`, 180, yPos, {align: 'right'});
+
+        // Background Bar
+        doc.setFillColor(240, 240, 240);
+        doc.roundedRect(14, yPos + 2, 182, 3, 1, 1, 'F');
+        // Progress Bar
+        doc.setFillColor(...primaryColor);
+        doc.roundedRect(14, yPos + 2, Math.max(barWidth, 2), 3, 1, 1, 'F');
+
+        yPos += 15;
+    });
+
+    // --- HALAMAN 3 & SETERUSNYA: DETAIL TABEL ---
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("LAMPIRAN: RINCIAN TRANSAKSI", 14, 20);
+
+    const tableBody = data.map(item => [
+        item.tanggal,
+        item.nama_staff.toUpperCase(),
+        item.produk,
+        item.no_rek,
+        item.notes || '-'
+    ]);
+
+    doc.autoTable({
+        startY: 30,
+        head: [['Tanggal', 'Nama Staff', 'Produk', 'No. Rekening', 'Catatan']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: { 
+            fillColor: primaryColor, 
+            fontSize: 9, 
+            halign: 'center',
+            cellPadding: 3
+        },
+        styles: { 
+            fontSize: 8,
+            cellPadding: 2 
+        },
+        columnStyles: {
+            1: { fontStyle: 'bold' },
+            2: { halign: 'center' }
+        },
+        didDrawPage: (data) => {
+            // Footer nomor halaman
+            doc.setFontSize(8);
+            doc.text(`Halaman ${data.pageNumber}`, 190, 285, { align: 'right' });
         }
+    });
+
+    // Final Save
+    doc.save(`Laporan_Eksklusif_Sales_${start}.pdf`);
+}
+
+        // Modal & CRUD Functions
+        function openEditModal(id) {
+            const item = allAdminData.find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('editId').value = item.id;
+            document.getElementById('editTanggal').value = item.tanggal;
+            document.getElementById('editNama').value = item.nama_staff;
+            document.getElementById('editProduk').value = item.produk;
+            document.getElementById('editRek').value = item.no_rek;
+            document.getElementById('editNotes').value = item.notes || '';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('editModal').classList.add('hidden'); }
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const updates = {
+                tanggal: document.getElementById('editTanggal').value,
+                nama_staff: document.getElementById('editNama').value,
+                produk: document.getElementById('editProduk').value,
+                no_rek: document.getElementById('editRek').value,
+                notes: document.getElementById('editNotes').value
+            };
+            const { error } = await _supabase.from('perolehan_gmm').update(updates).eq('id', id);
+            if (!error) { closeModal(); fetchAdminData(); }
+        });
 
         async function deleteItem(id) {
-            if (confirm('⚠️ PERINGATAN: Menghapus data ini tidak dapat dibatalkan. Lanjutkan?')) {
-                const { error } = await _supabase.from('perolehan_gmm').delete().eq('id', id);
-                if (!error) fetchAdminData();
+            if (confirm('Hapus data?')) {
+                await _supabase.from('perolehan_gmm').delete().eq('id', id);
+                fetchAdminData();
             }
         }
 
-        async function editItem(id, currentNote) {
-            const newNote = prompt("Revisi Catatan untuk data ini:", currentNote);
-            if (newNote !== null) {
-                const { error } = await _supabase.from('perolehan_gmm').update({ notes: newNote }).eq('id', id);
-                if (!error) fetchAdminData();
+        function sortData(key, isInit = false) {
+            if (!isInit) {
+                sortConfig.dir = (sortConfig.key === key && sortConfig.dir === 'asc') ? 'desc' : 'asc';
+                sortConfig.key = key;
             }
+            allAdminData.sort((a, b) => {
+                let vA = a[key] || ''; let vB = b[key] || '';
+                if (key === 'tanggal') return sortConfig.dir === 'asc' ? new Date(vA) - new Date(vB) : new Date(vB) - new Date(vA);
+                return sortConfig.dir === 'asc' ? vA.toString().localeCompare(vB) : vB.toString().localeCompare(vA);
+            });
+            renderAdminTable();
         }
 
-        filterBulan.addEventListener('change', fetchAdminData);
+        function changePage(move) {
+            const total = Math.ceil(allAdminData.length / rowsPerPage);
+            const target = currentPage + move;
+            if (target >= 1 && target <= total) { currentPage = target; renderAdminTable(); }
+        }
+
         if (sessionStorage.getItem('isAdmin') === 'true') fetchAdminData();
     </script>
 </body>
